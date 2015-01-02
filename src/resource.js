@@ -2,7 +2,13 @@ var res = {
     HelloWorld_png : "res/HelloWorld.png",
     CloseNormal_png : "res/CloseNormal.png",
     CloseSelected_png : "res/CloseSelected.png",
-    Spaceship_Titan_png : "res/Spaceships/Titan.png"
+    
+    Spaceship_Titan_png : "res/Spaceships/Titan.png",
+    Laser_png : "res/Laser.png",
+    Asteroid_png : "res/Asteroid.png",
+    	
+    // Soundtrack
+    Soundtrack_ThrustSequence_0_mp3 : "res/Soundtrack/Thrust_Sequence_0.mp3"
 };
 
 var g_resources = [];

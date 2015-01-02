@@ -12,55 +12,7 @@ var HelloWorldLayer = cc.Layer.extend({
         */
         
         var screen = new ScreenAdapter();
-/*
-        /////////////////////////////
-        // manipulate sprites on the screen
-        var sprite1 = new cc.Sprite.create(res.CloseNormal_png);
-        sprite1.setAnchorPoint(cc.p(0.5, 0.5));
-        sprite1.setPosition(screen.realCenter());
-        this.addChild(sprite1, 0);
-        
-        var sprite2 = new cc.Sprite.create(res.CloseNormal_png);
-        sprite2.setAnchorPoint(cc.p(0.5, 0.5));
-        sprite2.setPosition(screen.realCenter());
-        this.addChild(sprite2, 0);
-        
-        var sprite3 = new cc.Sprite.create(res.CloseNormal_png);
-        sprite3.setAnchorPoint(cc.p(0.5, 0.5));
-        sprite3.setPosition(screen.realCenter());
-        this.addChild(sprite3, 0);
-        
-        var sprite4 = new cc.Sprite.create(res.CloseNormal_png);
-        sprite4.setAnchorPoint(cc.p(0.5, 0.5));
-        sprite4.setPosition(screen.realCenter());
-        this.addChild(sprite4, 0);
-
-        var sprite5 = new cc.Sprite.create(res.CloseNormal_png);
-        sprite5.setAnchorPoint(cc.p(0.5, 0.5));
-        sprite5.setPosition(screen.realCenter());
-        this.addChild(sprite5, 0);
-        
-        // The first argument is the duration in seconds
-        // The second argument is the target position relative to canvas
-        var sprite_action1 = cc.MoveTo.create(2, screen.realP(0, 0));
-        sprite1.runAction(sprite_action1);
-        
-        var sprite_action2 = cc.MoveBy.create(2, screen.realP(MAX_WIDTH / 2, 0 - MAX_HEIGHT / 2));
-        sprite2.runAction(sprite_action2);
-        
-        // Third argument is the height of each jump
-        // Fourth argument is how many jumps it takes to get there
-        var sprite_action3 = cc.JumpTo.create(2, screen.realP(0, MAX_HEIGHT - 1), 50, 4);
-        sprite3.runAction(sprite_action3);
-        
-        var sprite_action4 = cc.JumpBy.create(2, screen.realP(MAX_WIDTH / 2, MAX_HEIGHT / 2), 80, 6)
-        sprite4.runAction(sprite_action4);
-        
-        var bezier1 = [screen.realP(0, MAX_HEIGHT / 2), screen.realP(100, -MAX_HEIGHT), screen.realP(100, 100)];
-        var sprite_action5 = cc.BezierTo.create(3, bezier1);
-        sprite5.runAction(sprite_action5);
-        */
-        
+        /*
         var playerPosition = screen.realP(1500, 100);
         var enemyPosition = screen.realP(100, 100);
 
@@ -97,6 +49,7 @@ var HelloWorldLayer = cc.Layer.extend({
         this.addChild(knifeSprite, 0);
         var axeAction = cc.MoveTo.create(1, enemyPosition);
         knifeSprite.runAction(axeAction);
+        */
         
         // Put a spaceship at the bottom of the screen
         var spaceshipTitan = new cc.Sprite.create(res.Spaceship_Titan_png);
@@ -106,7 +59,7 @@ var HelloWorldLayer = cc.Layer.extend({
         spaceshipTitan.runAction(spaceshipTitanScale);
         this.addChild(spaceshipTitan, 0);
         
-        // Set up single touch response
+        // Set up screen touch control of the spaceshipTitan sprite
         if(cc.sys.capabilities.hasOwnProperty('touches')) {
         	cc.eventManager.addListener(cc.EventListener.create({
         		event: cc.EventListener.TOUCH_ONE_BY_ONE,
@@ -135,8 +88,64 @@ var HelloWorldLayer = cc.Layer.extend({
         else {
         	cc.log('The system lacks touch screen capability');
         }
+
+        // Make the spaceship fire a laser blast repeatedly
+        this.schedule(this.fireLaser, 0.1);
+                
+        ////////////////////////////////////////////////////////
+        //
+        // Make an asteroid approach from the top of the screen
+        
+        // Create a sprite for an asteroid
+        var asteroid = new cc.Sprite.create(res.Asteroid_png);
+        asteroid.setAnchorPoint(0.5, 0.5);
+        asteroid.setPosition(screen.realP(100, MAX_HEIGHT + 100));
+        this.addChild(asteroid);
+        
+        // Make the asteroid move down the screen
+        var moveAsteroid = cc.RepeatForever.create(
+        		cc.MoveBy.create(1, screen.realP(0, -100)));
+        asteroid.runAction(moveAsteroid);
+        //
+        ////////////////////////////////////////////////////////
+        
+        this.schedule(this.spawnAsteroids, 5);
+        
+        // Add a soundtrack
+        cc.audioEngine.playMusic(res.Soundtrack_ThrustSequence_0_mp3, true);
+        cc.audioEngine.setMusicVolume(0.1);
         
         return true;
+    },
+    fireLaser: function(dt) {
+    	
+    	var screen = new ScreenAdapter();
+    	
+    	// Create a sprite for a laser blast
+    	var laserBlast = new cc.Sprite.create(res.Laser_png);
+    	laserBlast.setAnchorPoint(0.5, 0.5);
+    	laserBlast.setPosition(screen.realCenter());
+    	this.addChild(laserBlast, 0);
+
+    	// Make the laser blast move up the screen
+    	var projectLaser = cc.RepeatForever.create(
+    			cc.MoveBy.create(1, screen.realP(0, 1000)));
+    	laserBlast.runAction(projectLaser);
+    },
+    spawnAsteroids: function(dt) {
+    	
+    	var screen = new ScreenAdapter();
+    	
+    	// Create a sprite for an asteroid
+    	var asteroid = new cc.Sprite.create(res.Asteroid_png);
+    	asteroid.setAnchorPoint(0.5, 0.5);
+    	asteroid.setPosition(screen.realP(100, MAX_HEIGHT + 100));
+    	this.addChild(asteroid);
+
+    	// Make the asteroid move down the screen
+    	var moveAsteroid = cc.RepeatForever.create(
+    			cc.MoveBy.create(1, screen.realP(0, -100)));
+    	asteroid.runAction(moveAsteroid);
     }
 });
 

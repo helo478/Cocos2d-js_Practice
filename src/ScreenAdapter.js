@@ -71,4 +71,54 @@ function ScreenAdapter() {
 	this.realCenter = function() {
 		return cc.p(screenSize.width / 2, screenSize.height / 2);
 	}
+	
+	/** 
+	 * Returns the resolution-independent X-axis pixel address for a given
+	 * real X-axis pixel address
+	 */
+	this.abstractedX = function(x) {
+		var returnValue = Math.floor((MAX_WIDTH * x) / screenSize.width);
+		return returnValue;
+	};
+	
+	/**
+	 * Returns the resolution-independent Y-axis pixel address for a given
+	 * real Y-axis pixel address
+	 */
+	this.abstractedY = function(y) {
+		var returnValue = Math.floor((MAX_HEIGHT * y) / screenSize.height);
+		return returnValue;
+	};
+	
+	// Returns the integer rounded distance between two sets of x, y coordinates
+	function getDistance(p1, p2) {
+		cc.log(p1.x, p2.x);
+		
+		var xDiff = p1.x - p2.x;
+		var yDiff = p1.y - p2.y;
+		
+		cc.log(xDiff * xDiff, yDiff * yDiff);
+		
+		return Math.round(Math.sqrt((xDiff * xDiff) + (yDiff * yDiff)));
+	}
+	
+	/** 
+	 * Returns the distance, in resolution-independent units between two
+	 * given sets of real-pixel x, y coordinate pairs
+	 */
+	this.abstractDistance = function(rP1, rP2) {
+		
+		// convert each cc.p into the abstracted (x, y) coordinate
+		var iP1 = {
+			x: this.abstractedX(rP1.x),
+			y: this.abstractedY(rP1.y)
+		};
+		var iP2 = {
+			x: this.abstractedX(rP2.x),
+			y: this.abstractedY(rP2.y)
+		};
+		
+		// return the distance between x's
+		return getDistance(iP1, iP2);
+	};
 }

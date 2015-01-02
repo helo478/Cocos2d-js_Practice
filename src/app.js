@@ -111,10 +111,19 @@ var HelloWorldLayer = cc.Layer.extend({
         	cc.eventManager.addListener(cc.EventListener.create({
         		event: cc.EventListener.TOUCH_ONE_BY_ONE,
         		swallowTouches: true,
-        		onTouchBegan: function(touch, event) {        			
+        		onTouchBegan: function(touch, event) {
         			cc.log(touch.getLocationX(), touch.getLocationY());
-        			var spaceshipTitanMove = cc.MoveTo.create(1, cc.p(
-        					touch.getLocationX(), 0));
+        			
+        			var origin = spaceshipTitan.getPosition();
+        			var target = cc.p(touch.getLocationX(), 0);
+        			var distance = screen.abstractDistance(origin, target);
+        			
+        			cc.log('Distance:', distance);
+        			
+        			var speed = .0005; // TODO make this dynamic
+        			var duration = distance * speed;
+        			
+        			var spaceshipTitanMove = cc.MoveTo.create(duration, target);
         			spaceshipTitan.stopAllActions();
         			spaceshipTitan.runAction(spaceshipTitanMove);
         			return true;

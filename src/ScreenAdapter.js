@@ -92,12 +92,9 @@ function ScreenAdapter() {
 	
 	// Returns the integer rounded distance between two sets of x, y coordinates
 	function getDistance(p1, p2) {
-		cc.log(p1.x, p2.x);
 		
 		var xDiff = p1.x - p2.x;
 		var yDiff = p1.y - p2.y;
-		
-		cc.log(xDiff * xDiff, yDiff * yDiff);
 		
 		return Math.round(Math.sqrt((xDiff * xDiff) + (yDiff * yDiff)));
 	}

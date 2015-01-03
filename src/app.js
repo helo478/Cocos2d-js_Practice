@@ -1,83 +1,90 @@
-const PLAYER_SPACESHIP = 'PLAYER_SPACESHIP';
+const PLAYER_SPACESHIP_TAG = 0;
 
 var HelloWorldLayer = cc.Layer.extend({
     sprite:null,
     ctor:function () {
-        // ////////////////////////////
-        // 1. super init first
+
+        // Call the super-constructor
         this._super();
 
-        /*
-		 * ///////////////////////////// // ask the window size var size =
-		 * cc.winSize;
-		 */
-        
+        // Get a screen adapter object
         var screen = new ScreenAdapter();
-        /*
-		 * var playerPosition = screen.realP(1500, 100); var enemyPosition =
-		 * screen.realP(100, 100);
-		 *  // Animate an axe sprite with a long arc var axeSprite = new
-		 * cc.Sprite.create(res.CloseNormal_png); axeSprite.setAnchorPoint(0.5,
-		 * 0.5); axeSprite.setPosition(playerPosition); this.addChild(axeSprite,
-		 * 0); var axeBezier = [ screen.realP(1000, 1000), screen.realP(600,
-		 * 1000), enemyPosition];
-		 * 
-		 * var axeAction = cc.BezierTo.create(3, axeBezier);
-		 * axeSprite.runAction(axeAction);
-		 *  // Animate a sword sprite with a long arc var swordSprite = new
-		 * cc.Sprite.create(res.CloseNormal_png);
-		 * swordSprite.setAnchorPoint(0.5, 0.5);
-		 * swordSprite.setPosition(playerPosition); this.addChild(swordSprite,
-		 * 0); var swordBezier = [ screen.realP(1000, 600), screen.realP(600,
-		 * 600), enemyPosition];
-		 * 
-		 * var swordAction = cc.BezierTo.create(2, swordBezier);
-		 * swordSprite.runAction(swordAction);
-		 *  // Animate a knife sprite with no arc var knifeSprite = new
-		 * cc.Sprite.create(res.CloseNormal_png);
-		 * knifeSprite.setAnchorPoint(0.5, 0.5);
-		 * knifeSprite.setPosition(playerPosition); this.addChild(knifeSprite,
-		 * 0); var axeAction = cc.MoveTo.create(1, enemyPosition);
-		 * knifeSprite.runAction(axeAction);
-		 */
-        
-        // Put a spaceship at the bottom of the screen
+
+        // Create a titan spaceship sprite and position it at the bottom center 
+        // of the screen
         var spaceshipTitan = new cc.Sprite.create(res.Spaceship_Titan_png);
-        spaceshipTitan.setTag(PLAYER_SPACESHIP);
+        spaceshipTitan.setTag(PLAYER_SPACESHIP_TAG);
         spaceshipTitan.setAnchorPoint(0.5, 0);
         spaceshipTitan.setPosition(screen.realP(MAX_WIDTH / 2, 0));
         var spaceshipTitanScale = cc.ScaleTo.create(0, 0.25, 0.25);
         spaceshipTitan.runAction(spaceshipTitanScale);
         this.addChild(spaceshipTitan, 0);
         
-        // Set up screen touch control of the spaceshipTitan sprite
+        // Set up screen-touch controls
         if(cc.sys.capabilities.hasOwnProperty('touches')) {
+        	cc.log('The system has touch screen capability. '
+        			+ 'Setting up screen touch handling. ');
+        	
         	cc.eventManager.addListener(cc.EventListener.create({
         		event: cc.EventListener.TOUCH_ONE_BY_ONE,
         		swallowTouches: true,
         		onTouchBegan: function(touch, event) {
-        			cc.log(touch.getLocationX(), touch.getLocationY());
         			
+        			// Calculate the abstract distance between input point
+        			// and the spaceship's current location
         			var origin = spaceshipTitan.getPosition();
         			var target = cc.p(touch.getLocationX(), 0);
         			var distance = screen.abstractDistance(origin, target);
         			
-        			cc.log('Distance:', distance);
-        			
+        			// Calculate the duration of the new moveTo action,
+        			// such that the speed of the spaceship is constant
         			var speed = .0005; // TODO make this dynamic
         			var duration = distance * speed;
         			
+        			// Replace any current action with the new move action
+        			// TODO make this operation atomic
         			var spaceshipTitanMove = cc.MoveTo.create(duration, target);
         			spaceshipTitan.stopAllActions();
         			spaceshipTitan.runAction(spaceshipTitanMove);
+        			
         			return true;
         		}
         	}), 
         		this
         	);     	
         }
-        else {
-        	cc.log('The system lacks touch screen capability');
+        // Set up mouse click controls
+        else if(cc.sys.capabilities.hasOwnProperty('mouse')) {
+        	cc.log('The system lacks touch screen capability. '
+        			+ 'Setting up mouse click handling. ');
+        	
+        	cc.eventManager.addListener(cc.EventListener.create({
+        		event: cc.EventListener.MOUSE,
+        		onMouseDown: function(event) {
+        			if(event.getButton() == cc.EventMouse.BUTTON_LEFT) {
+        				
+        				// Calculate the abstract distance between input point
+        				// and the spaceship's current location
+        				var origin = spaceshipTitan.getPosition();
+        				var target = cc.p(event.getLocationX(), 0);
+        				var distance = screen.abstractDistance(origin, target);
+
+        				// Calculate the duration of the new moveTo action,
+        				// such that the speed of the spaceship is constant
+        				var speed = .0005; // TODO make this dynamic
+        				var duration = distance * speed;
+
+        				// Replace any current action with the new move action
+        				// TODO make this operation atomic
+        				var spaceshipTitanMove = cc.MoveTo.create(duration, target);
+        				spaceshipTitan.stopAllActions();
+        				spaceshipTitan.runAction(spaceshipTitanMove);
+        			}
+        		}
+        		
+        	}), 
+        		this
+        	);
         }
 
         // Make the spaceship fire a laser blast repeatedly
@@ -88,7 +95,7 @@ var HelloWorldLayer = cc.Layer.extend({
         
         // Add a soundtrack
         cc.audioEngine.playMusic(res.Soundtrack_ThrustSequence_0_mp3, true);
-        cc.audioEngine.setMusicVolume(0.1);
+        cc.audioEngine.setMusicVolume(0.1); // For now, the volume is low
         
         return true;
     },
@@ -96,7 +103,8 @@ var HelloWorldLayer = cc.Layer.extend({
     	
     	var screen = new ScreenAdapter();
     	
-    	var spaceship = this.getChildByTag(PLAYER_SPACESHIP);
+    	// Get a reference to the player spaceship, die if error
+    	var spaceship = this.getChildByTag(PLAYER_SPACESHIP_TAG);
     	if(!spaceship) {
     		throw new RuntimeException('Null reference to the player spaceship ' 
     				+ 'in fireLaser callback');
@@ -108,7 +116,7 @@ var HelloWorldLayer = cc.Layer.extend({
     	laserBlast.setPosition(cc.p(spaceship.getPosition().x, screen.realY(200)));
     	this.addChild(laserBlast, 0);
 
-    	// Make the laser blast move up the screen
+    	// Make the laser blast move up the screen forever
     	var projectLaser = cc.RepeatForever.create(
     			cc.MoveBy.create(1, screen.realP(0, 1000)));
     	laserBlast.runAction(projectLaser);
@@ -125,7 +133,6 @@ var HelloWorldLayer = cc.Layer.extend({
 	    	var asteroid = new cc.Sprite.create(res.Asteroid_png);
 	    	asteroid.setAnchorPoint(0.5, 0.5);
 	    	asteroid.setPosition(screen.realP(Math.random() * MAX_WIDTH, MAX_HEIGHT + 100));
-	    	cc.log('Asteroid spawned at: ', asteroid.getPositionX());
 	    	this.addChild(asteroid);
 	
 	    	// Make the asteroid move down the screen

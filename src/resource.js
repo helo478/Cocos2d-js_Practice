@@ -6,6 +6,10 @@ var res = {
     Spaceship_Titan_png : "res/Spaceships/Titan.png",
     Laser_png : "res/Laser.png",
     Asteroid_png : "res/Asteroid.png",
+    
+    // Sound Effects
+    laser_shooting_sfx_wav : "res/laser_shooting_sfx.wav",
+    boom4_wav : "res/boom4.wav",
     	
     // Soundtrack
     Soundtrack_ThrustSequence_0_mp3 : "res/Soundtrack/Thrust_Sequence_0.mp3"

@@ -91,11 +91,14 @@ var HelloWorldLayer = cc.Layer.extend({
         this.schedule(this.fireLaser, 0.3);
                 
         // Make asteroids spawn repeatedly
-        this.schedule(this.spawnAsteroids, 2);
+        this.schedule(this.spawnAsteroids, 1);
         
         // Add a soundtrack
         cc.audioEngine.playMusic(res.Soundtrack_ThrustSequence_0_mp3, true);
         cc.audioEngine.setMusicVolume(0.1); // For now, the volume is low
+        
+        // Limit the volume of sound effects
+        cc.audioEngine.setEffectsVolume(0.1);
         
         return true;
     },
@@ -123,14 +126,16 @@ var HelloWorldLayer = cc.Layer.extend({
     	laserBlast.runAction(projectLaser);
     	laserBlast.schedule(function() {
 				handleLaser(this);
-		}) 
+		});
+    	
+    	cc.audioEngine.playEffect(res.laser_shooting_sfx_wav, false);
     },
     spawnAsteroids: function(dt) {
     	
 	    var screen = new ScreenAdapter();
 	    	
 	    // If an asteroid randomly spawns
-	    if(Math.random() >= 0.5) {
+	    if(Math.random() >= 0.2) {
 	    	
 	    	// Create a sprite for an asteroid
 	    	// Randomize X coordinate
@@ -170,23 +175,23 @@ function handleAsteroid(sprite)
 		return;
 	}
 	
-	var parentFoo = sprite.getParent();
-	var allChildren = parentFoo.getChildren();
+	// Check for collisions with laser blasts
+	var layer = sprite.getParent();
+	var allChildren = layer.getChildren();
 	for(var i = 0; i< allChildren.length; i++) {
 		if (allChildren[i].getName() == "laserBlast"){
 			
 			var a = allChildren[i].getBoundingBox();
 			var b = sprite.getBoundingBox();
 
+			// If there is a collision, handle it
 			if(cc.rectIntersectsRect(a, b)){
-				cc.log("Boom!"); //Collision
 				sprite.removeFromParent(true);
+				cc.audioEngine.playEffect(res.boom4_wav, false);
 				return;
 			}
 		}
 	}
-	
-
 }
 
 var HelloWorldScene = cc.Scene.extend({

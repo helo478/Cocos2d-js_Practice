@@ -91,7 +91,7 @@ var HelloWorldLayer = cc.Layer.extend({
         this.schedule(this.fireLaser, 0.3);
                 
         // Make asteroids spawn repeatedly
-        this.schedule(this.spawnAsteroids, 5);
+        this.schedule(this.spawnAsteroids, 2);
         
         // Add a soundtrack
         cc.audioEngine.playMusic(res.Soundtrack_ThrustSequence_0_mp3, true);
@@ -114,12 +114,16 @@ var HelloWorldLayer = cc.Layer.extend({
     	var laserBlast = new cc.Sprite.create(res.Laser_png);
     	laserBlast.setAnchorPoint(0.5, 0.5);
     	laserBlast.setPosition(cc.p(spaceship.getPosition().x, screen.realY(200)));
+    	laserBlast.setName("laserBlast");
     	this.addChild(laserBlast, 0);
 
     	// Make the laser blast move up the screen forever
     	var projectLaser = cc.RepeatForever.create(
     			cc.MoveBy.create(1, screen.realP(0, 1000)));
     	laserBlast.runAction(projectLaser);
+    	laserBlast.schedule(function() {
+				handleLaser(this);
+		}) 
     },
     spawnAsteroids: function(dt) {
     	
@@ -133,15 +137,57 @@ var HelloWorldLayer = cc.Layer.extend({
 	    	var asteroid = new cc.Sprite.create(res.Asteroid_png);
 	    	asteroid.setAnchorPoint(0.5, 0.5);
 	    	asteroid.setPosition(screen.realP(Math.random() * MAX_WIDTH, MAX_HEIGHT + 100));
+	    	asteroid.setName("FooAsteroid");
 	    	this.addChild(asteroid);
 	
 	    	// Make the asteroid move down the screen
 	    	var moveAsteroid = cc.RepeatForever.create(
 	    			cc.MoveBy.create(1, screen.realP(0, -100)));
 	    	asteroid.runAction(moveAsteroid);
+	    	asteroid.schedule(function() {
+	    		handleAsteroid(this);
+	    	})
 	    }
     }
 });
+
+function handleLaser(sprite) {
+	// Remove sprite if out of view port; 
+	if (sprite.getPositionY() > cc.winSize.height)
+	{
+		sprite.removeFromParent(true);
+		return;
+	}
+}
+
+function handleAsteroid(sprite)
+{
+	// Remove sprite if out of view port; 
+	if (sprite.getPositionY() < 0)
+	{
+		cc.log('Remove Astroiod');
+		sprite.removeFromParent(true);
+		return;
+	}
+	
+	var parentFoo = sprite.getParent();
+	var allChildren = parentFoo.getChildren();
+	for(var i = 0; i< allChildren.length; i++) {
+		if (allChildren[i].getName() == "laserBlast"){
+			
+			var a = allChildren[i].getBoundingBox();
+			var b = sprite.getBoundingBox();
+
+			if(cc.rectIntersectsRect(a, b)){
+				cc.log("Boom!"); //Collision
+				sprite.removeFromParent(true);
+				return;
+			}
+		}
+	}
+	
+
+}
 
 var HelloWorldScene = cc.Scene.extend({
     onEnter:function () {
